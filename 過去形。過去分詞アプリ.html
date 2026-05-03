@@ -57,7 +57,7 @@
         <button onclick="quizApp.startFullMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
             <div>
                 <div class="font-bold text-lg">全問モード</div>
-                <div class="text-sm text-slate-500">全動詞を順番に出題（3形同時解答）</div>
+                <div class="text-sm text-slate-500">全59問（3形同時解答）</div>
             </div>
             <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
         </button>
@@ -65,7 +65,7 @@
         <button onclick="quizApp.showCountDialog()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
             <div>
                 <div class="font-bold text-lg">問題数指定モード</div>
-                <div class="text-sm text-slate-500">好きな問題数で挑戦</div>
+                <div class="text-sm text-slate-500">1〜59問の間で挑戦 練習用</div>
             </div>
             <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
         </button>
@@ -87,7 +87,7 @@
             </button>
         </div>
         <button onclick="quizApp.showVerbList()" class="w-full p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all">
-            <div class="font-bold text-center">不規則動詞一覧・✨AI例文</div>
+            <div class="font-bold text-center">不規則動詞一覧</div>
         </button>
     </div>
 
@@ -131,7 +131,8 @@
     <div id="result-area" class="hidden glass-card p-8 text-center">
         <div class="text-5xl mb-4">📊</div>
         <h2 class="text-2xl font-bold mb-2">結果発表</h2>
-        <div id="score-display" class="text-4xl font-bold text-indigo-600 mb-6">0 / 0</div>
+        <div id="score-display" class="text-4xl font-bold text-indigo-600 mb-2">0 / 0</div>
+        <div id="score-message" class="text-lg font-bold text-slate-600 mb-6 px-4 py-2 bg-slate-50 rounded-lg">---</div>
         <div id="ranking-notice" class="text-sm text-orange-500 font-bold mb-6 hidden">ランクイン！</div>
         <button onclick="quizApp.exitToMenu()" class="w-full py-4 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-colors">メニューへ</button>
     </div>
@@ -142,7 +143,7 @@
 </div>
 
 <script>
-    const apiKey = ""; // APIキーが空の場合、AI機能はスキップされる
+    const apiKey = ""; 
 
     const VERB_DATA = [
         {ja: "落ちる", present: "fall", past: "fell", pp: "fallen"},
@@ -231,6 +232,7 @@
                 status: document.getElementById('quiz-status'),
                 progress: document.getElementById('progress-bar'),
                 score: document.getElementById('score-display'),
+                message: document.getElementById('score-message'),
                 rankingNotice: document.getElementById('ranking-notice'),
                 aiCoaching: document.getElementById('ai-coaching'),
                 aiContent: document.getElementById('ai-content')
@@ -329,15 +331,21 @@
 
         showCountDialog() {
             this.showModal(`
-                <h3 class="text-xl font-bold mb-4">問題数指定</h3>
-                <input type="number" id="quiz-count-input" value="10" min="1" max="${VERB_DATA.length}" class="w-full p-3 border rounded mb-4">
-                <button onclick="quizApp.startCustomCount()" class="w-full bg-indigo-600 text-white p-3 rounded font-bold">開始</button>
+                <h3 class="text-xl font-bold mb-2">問題数指定</h3>
+                <p class="text-xs text-slate-500 mb-4">1〜59問の間で指定してください</p>
+                <input type="number" id="quiz-count-input" value="10" min="1" max="59" class="w-full p-3 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center text-xl font-bold">
+                <button onclick="quizApp.startCustomCount()" class="w-full bg-indigo-600 text-white p-3 rounded font-bold hover:bg-indigo-700 transition-colors">開始</button>
             `);
         }
 
         startCustomCount() {
             const countInput = document.getElementById('quiz-count-input');
-            const count = parseInt(countInput.value) || 10;
+            let count = parseInt(countInput.value) || 10;
+            
+            // 範囲制限: 0以下は1に、59以上は59に補正
+            if (count < 1) count = 1;
+            if (count > 59) count = 59;
+            
             this.closeModal();
             this.isFullMode = false;
             const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
@@ -348,7 +356,13 @@
             const stats = this.getMistakeStats();
             const indices = Object.keys(stats).map(Number);
             if (indices.length === 0) {
-                alert("間違い履歴がありません。");
+                this.showModal(`
+                    <div class="text-center p-6">
+                        <div class="text-4xl mb-4">💡</div>
+                        <p class="font-bold text-slate-600">まだ間違いがありません</p>
+                        <button onclick="quizApp.closeModal()" class="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg">了解</button>
+                    </div>
+                `);
                 return;
             }
             this.isFullMode = false;
@@ -436,7 +450,22 @@
             this.ui.quiz.classList.add('hidden');
             this.ui.result.classList.remove('hidden');
             this.ui.score.innerText = `${this.score} / ${this.currentQuiz.length}`;
-            if (this.isFullMode) this.updateRanking();
+            
+            let msg = "";
+            if (this.isFullMode) {
+                const s = this.score;
+                if (s === 0) msg = "舐めてんのか？";
+                else if (s <= 20) msg = "チョベリバ";
+                else if (s <= 35) msg = "全然、勉強が足りてない";
+                else if (s <= 46) msg = "まさかこの程度で良いと思ってる？";
+                else if (s <= 57) msg = "どうせなら全部覚えてくれよ";
+                else if (s === 58) msg = "なんで逆に一問間違えるんだよ！";
+                else if (s === 59) msg = "遂に来たね、\"コッチ側\"に...";
+                this.updateRanking();
+            } else {
+                msg = "お疲れ様！継続は力なり。";
+            }
+            this.ui.message.innerText = msg;
         }
 
         updateRanking() {
@@ -451,12 +480,23 @@
         showAnalysis() {
             const stats = this.getMistakeStats();
             const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]);
-            const listHtml = sorted.length > 0 
-                ? sorted.map(([idx, count]) => {
-                    const v = VERB_DATA[idx];
-                    return `<div class="flex justify-between items-center border-b py-3"><div><div class="font-bold">${v.ja}</div><div class="text-xs text-slate-500">${v.present}/${v.past}/${v.pp}</div></div><div class="bg-red-100 text-red-600 px-3 py-1 rounded-full font-bold text-sm">${count}回ミス</div></div>`;
-                }).join('')
-                : '<div class="text-center py-8 text-slate-400">ミスなし。</div>';
+            
+            if (sorted.length === 0) {
+                this.showModal(`
+                    <div class="text-center p-6">
+                        <div class="text-4xl mb-4">✨</div>
+                        <p class="font-bold text-slate-600">まだ間違いがありません</p>
+                        <button onclick="quizApp.closeModal()" class="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg">了解</button>
+                    </div>
+                `);
+                return;
+            }
+
+            const listHtml = sorted.map(([idx, count]) => {
+                const v = VERB_DATA[idx];
+                return `<div class="flex justify-between items-center border-b py-3"><div><div class="font-bold">${v.ja}</div><div class="text-xs text-slate-500">${v.present}/${v.past}/${v.pp}</div></div><div class="bg-red-100 text-red-600 px-3 py-1 rounded-full font-bold text-sm">${count}回ミス</div></div>`;
+            }).join('');
+            
             this.showModal(`<div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-red-600">誤答分析</h3><button onclick="quizApp.closeModal()">✕</button></div><div class="space-y-1">${listHtml}</div>`);
         }
 
