@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不規則動詞マスター made by Oikawa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        input:disabled { background-color: #f3f4f6; cursor: not-allowed; }
+        .correct-input { border-color: #10b981 !important; background-color: #ecfdf5; }
+        .wrong-input { border-color: #ef4444 !important; background-color: #fef2f2; }
+        
+        .dot-flashing {
+            position: relative; width: 10px; height: 10px; border-radius: 5px;
+            background-color: #6366f1; color: #6366f1;
+            animation: dot-flashing 1s infinite linear alternate;
+            animation-delay: .5s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: ''; display: inline-block; position: absolute; top: 0;
+        }
+        .dot-flashing::before {
+            left: -15px; width: 10px; height: 10px; border-radius: 5px;
+            background-color: #6366f1; color: #6366f1;
+            animation: dot-flashing 1s infinite linear alternate;
+            animation-delay: 0s;
+        }
+        .dot-flashing::after {
+            left: 15px; width: 10px; height: 10px; border-radius: 5px;
+            background-color: #6366f1; color: #6366f1;
+            animation: dot-flashing 1s infinite linear alternate;
+            animation-delay: 1s;
+        }
+        @keyframes dot-flashing {
+            0% { background-color: #6366f1; }
+            50%, 100% { background-color: #ebebef; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800">
+
+<div id="app" class="max-w-2xl mx-auto p-4 md:p-8">
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-indigo-700">不規則動詞マスター</h1>
+        <p class="text-slate-500 mt-2">made by OIKAWA</p>
+    </header>
+
+    <div id="menu" class="space-y-4">
+        <button onclick="quizApp.startFullMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
+            <div>
+                <div class="font-bold text-lg">全問モード</div>
+                <div class="text-sm text-slate-500">全動詞を順番に出題（3形同時解答）</div>
+            </div>
+            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+
+        <button onclick="quizApp.showCountDialog()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
+            <div>
+                <div class="font-bold text-lg">問題数指定モード</div>
+                <div class="text-sm text-slate-500">好きな問題数で挑戦</div>
+            </div>
+            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+
+        <button onclick="quizApp.startMistakeMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
+            <div>
+                <div class="font-bold text-lg">弱点克服モード</div>
+                <div class="text-sm text-slate-500">最近間違えた問題から出題</div>
+            </div>
+            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="quizApp.showAnalysis()" class="p-4 glass-card hover:bg-red-50 border border-transparent hover:border-red-200 transition-all">
+                <div class="font-bold text-center text-red-600">誤答分析</div>
+            </button>
+            <button onclick="quizApp.showRanking()" class="p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all">
+                <div class="font-bold text-center">ランキング</div>
+            </button>
+        </div>
+        <button onclick="quizApp.showVerbList()" class="w-full p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all">
+            <div class="font-bold text-center">不規則動詞一覧・✨AI例文</div>
+        </button>
+    </div>
+
+    <div id="quiz-area" class="hidden glass-card p-6 shadow-xl relative overflow-hidden">
+        <div id="progress-bar" class="absolute top-0 left-0 h-1 bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
+        <div class="flex justify-between items-center mb-6">
+            <span id="quiz-status" class="text-sm font-medium text-slate-400">Question 1/10</span>
+            <button onclick="quizApp.exitToMenu()" class="text-sm text-red-400 hover:text-red-600">終了</button>
+        </div>
+        <div class="text-center mb-6">
+            <div id="japanese-word" class="text-4xl font-bold text-slate-700 mb-2">---</div>
+            <div class="text-xs text-slate-400">3つの形をすべて入力してください</div>
+        </div>
+        <div class="space-y-4 mb-6">
+            <div>
+                <label class="text-xs font-bold text-slate-400 ml-1">原形 (Present)</label>
+                <input type="text" id="ans-present" placeholder="" autocomplete="off" class="w-full p-3 text-center text-xl border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-all">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-400 ml-1">過去形 (Past)</label>
+                <input type="text" id="ans-past" placeholder="" autocomplete="off" class="w-full p-3 text-center text-xl border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-all">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-400 ml-1">過去分詞形 (Past Participle)</label>
+                <input type="text" id="ans-pp" placeholder="" autocomplete="off" class="w-full p-3 text-center text-xl border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-all">
+            </div>
+            <button id="submit-btn" onclick="quizApp.checkAnswer()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg hover:bg-indigo-700 transition-colors">判定</button>
+        </div>
+        <div id="feedback" class="text-center min-h-[60px]"></div>
+        <div id="ai-coaching" class="hidden mt-4 p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-lg">✨</span>
+                <span class="font-bold text-indigo-700 text-sm">AI 覚え方のコツ</span>
+            </div>
+            <div id="ai-content" class="text-sm text-slate-600 leading-relaxed">
+                <div class="flex justify-center py-4"><div class="dot-flashing"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-area" class="hidden glass-card p-8 text-center">
+        <div class="text-5xl mb-4">📊</div>
+        <h2 class="text-2xl font-bold mb-2">結果発表</h2>
+        <div id="score-display" class="text-4xl font-bold text-indigo-600 mb-6">0 / 0</div>
+        <div id="ranking-notice" class="text-sm text-orange-500 font-bold mb-6 hidden">ランクイン！</div>
+        <button onclick="quizApp.exitToMenu()" class="w-full py-4 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-colors">メニューへ</button>
+    </div>
+
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div id="modal-content" class="bg-white rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-6"></div>
+    </div>
+</div>
+
+<script>
+    const apiKey = ""; // APIキーが空の場合、AI機能はスキップされる
+
+    const VERB_DATA = [
+        {ja: "落ちる", present: "fall", past: "fell", pp: "fallen"},
+        {ja: "見つける", present: "find", past: "found", pp: "found"},
+        {ja: "思う", present: "think", past: "thought", pp: "thought"},
+        {ja: "開く・催す", present: "hold", past: "held", pp: "held"},
+        {ja: "戦う", present: "fight", past: "fought", pp: "fought"},
+        {ja: "歌う", present: "sing", past: "sang", pp: "sung"},
+        {ja: "与える", present: "give", past: "gave", pp: "given"},
+        {ja: "始める", present: "begin", past: "began", pp: "begun"},
+        {ja: "見せる", present: "show", past: "showed", pp: "shown"},
+        {ja: "させる", present: "let", past: "let", pp: "let"},
+        {ja: "教える", present: "teach", past: "taught", pp: "taught"},
+        {ja: "言う", present: "say", past: "said", pp: "said"},
+        {ja: "着ている", present: "wear", past: "wore", pp: "worn"},
+        {ja: "建てる", present: "build", past: "built", pp: "built"},
+        {ja: "持ってくる", present: "bring", past: "brought", pp: "brought"},
+        {ja: "走る", present: "run", past: "ran", pp: "run"},
+        {ja: "送る", present: "send", past: "sent", pp: "sent"},
+        {ja: "持っている", present: "have", past: "had", pp: "had"},
+        {ja: "be 動詞", present: "be", past: "was/were", pp: "been"},
+        {ja: "乗る", present: "ride", past: "rode", pp: "ridden"},
+        {ja: "感じる", present: "feel", past: "felt", pp: "felt"},
+        {ja: "置く", present: "put", past: "put", pp: "put"},
+        {ja: "保つ", present: "keep", past: "kept", pp: "kept"},
+        {ja: "書く", present: "write", past: "wrote", pp: "written"},
+        {ja: "知っている", present: "know", past: "knew", pp: "known"},
+        {ja: "話す", present: "speak", past: "spoke", pp: "spoken"},
+        {ja: "～になる", present: "become", past: "became", pp: "become"},
+        {ja: "立つ", present: "stand", past: "stood", pp: "stood"},
+        {ja: "する", present: "do", past: "did", pp: "done"},
+        {ja: "食べる", present: "eat", past: "ate", pp: "eaten"},
+        {ja: "見える", present: "see", past: "saw", pp: "seen"},
+        {ja: "得る", present: "get", past: "got", pp: "got"},
+        {ja: "絵を描く", present: "draw", past: "drew", pp: "drawn"},
+        {ja: "行く", present: "go", past: "went", pp: "gone"},
+        {ja: "失う", present: "lose", past: "lost", pp: "lost"},
+        {ja: "出発する", present: "leave", past: "left", pp: "left"},
+        {ja: "来る", present: "come", past: "came", pp: "come"},
+        {ja: "選ぶ", present: "choose", past: "chose", pp: "chosen"},
+        {ja: "聞く", present: "hear", past: "heard", pp: "heard"},
+        {ja: "理解する", present: "understand", past: "understood", pp: "understood"},
+        {ja: "読む", present: "read", past: "read", pp: "read"},
+        {ja: "意味する", present: "mean", past: "meant", pp: "meant"},
+        {ja: "作る", present: "make", past: "made", pp: "made"},
+        {ja: "会う", present: "meet", past: "met", pp: "met"},
+        {ja: "つかまえる", present: "catch", past: "caught", pp: "caught"},
+        {ja: "勝つ", present: "win", past: "won", pp: "won"},
+        {ja: "眠る", present: "sleep", past: "slept", pp: "slept"},
+        {ja: "過ごす・費やす", present: "spend", past: "spent", pp: "spent"},
+        {ja: "買う", present: "buy", past: "bought", pp: "bought"},
+        {ja: "写真をとる", present: "take", past: "took", pp: "taken"},
+        {ja: "飲む", present: "drink", past: "drank", pp: "drunk"},
+        {ja: "切る", present: "cut", past: "cut", pp: "cut"},
+        {ja: "売る", present: "sell", past: "sold", pp: "sold"},
+        {ja: "話す・教える", present: "tell", past: "told", pp: "told"},
+        {ja: "座る", present: "sit", past: "sat", pp: "sat"},
+        {ja: "壊す", present: "break", past: "broke", pp: "broken"},
+        {ja: "泳ぐ", present: "swim", past: "swam", pp: "swum"},
+        {ja: "忘れる", present: "forget", past: "forgot", pp: "forgotten"},
+        {ja: "飛ぶ", present: "fly", past: "flew", pp: "flown"}
+    ];
+
+    class QuizApp {
+        constructor() {
+            this.history = JSON.parse(localStorage.getItem('verb_history_v2') || '[]');
+            this.ranking = JSON.parse(localStorage.getItem('verb_ranking_v2') || '[]');
+            this.currentQuiz = [];
+            this.currentIndex = 0;
+            this.score = 0;
+            this.isFullMode = false;
+            
+            this.ui = {
+                menu: document.getElementById('menu'),
+                quiz: document.getElementById('quiz-area'),
+                result: document.getElementById('result-area'),
+                modal: document.getElementById('modal-overlay'),
+                modalContent: document.getElementById('modal-content'),
+                jp: document.getElementById('japanese-word'),
+                inputs: {
+                    present: document.getElementById('ans-present'),
+                    past: document.getElementById('ans-past'),
+                    pp: document.getElementById('ans-pp')
+                },
+                feedback: document.getElementById('feedback'),
+                status: document.getElementById('quiz-status'),
+                progress: document.getElementById('progress-bar'),
+                score: document.getElementById('score-display'),
+                rankingNotice: document.getElementById('ranking-notice'),
+                aiCoaching: document.getElementById('ai-coaching'),
+                aiContent: document.getElementById('ai-content')
+            };
+
+            [this.ui.inputs.present, this.ui.inputs.past, this.ui.inputs.pp].forEach((el, idx, arr) => {
+                el.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        if (idx < arr.length - 1) arr[idx + 1].focus();
+                        else this.checkAnswer();
+                    }
+                });
+            });
+        }
+
+        async callGemini(prompt, systemInstruction) {
+            if (!apiKey) return null;
+            let retries = 0;
+            const maxRetries = 3;
+            const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+            while (retries < maxRetries) {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: systemInstruction }] }
+                        })
+                    });
+                    if (!response.ok) throw new Error('API Error');
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (error) {
+                    retries++;
+                    if (retries >= maxRetries) return null;
+                    await delay(1000);
+                }
+            }
+        }
+
+        async fetchAICoaching(verb) {
+            if (!apiKey) {
+                this.ui.aiCoaching.classList.add('hidden');
+                return;
+            }
+            this.ui.aiCoaching.classList.remove('hidden');
+            this.ui.aiContent.innerHTML = '<div class="flex justify-center py-4"><div class="dot-flashing"></div></div>';
+            
+            const prompt = `動詞「${verb.present}」（意味: ${verb.ja}）の変化形は ${verb.present} - ${verb.past} - ${verb.pp} です。この動詞の覚え方のコツと、例文1つを日本語訳付きで。`;
+            const sys = "英語教師です。3行以内でアドバイスしてください。マークダウンなし。";
+
+            const text = await this.callGemini(prompt, sys);
+            this.ui.aiContent.innerText = text || "AIアドバイスは現在利用できません。";
+        }
+
+        async showAIExample(present, ja) {
+            const container = document.getElementById('ai-example-box');
+            if (!apiKey) {
+                container.innerText = "APIキーを設定してください。";
+                return;
+            }
+            container.innerHTML = '<div class="flex justify-center py-4"><div class="dot-flashing"></div></div>';
+            const prompt = `「${present}」の現在・過去・過去分詞の例文を日本語訳付きで作って。`;
+            const text = await this.callGemini(prompt, "例文作成講師です。");
+            container.innerHTML = `<div class="bg-indigo-50 p-4 rounded-xl text-sm whitespace-pre-wrap">${text || "エラーが発生しました。"}</div>`;
+        }
+
+        saveResult(verbIndex, isCorrect) {
+            this.history.unshift({ verbIndex, isCorrect, timestamp: Date.now() });
+            if (this.history.length > 1000) this.history.pop();
+            localStorage.setItem('verb_history_v2', JSON.stringify(this.history));
+        }
+
+        showModal(html) {
+            this.ui.modalContent.innerHTML = html;
+            this.ui.modal.classList.remove('hidden');
+        }
+
+        closeModal() {
+            this.ui.modal.classList.add('hidden');
+        }
+
+        exitToMenu() {
+            this.ui.quiz.classList.add('hidden');
+            this.ui.result.classList.add('hidden');
+            this.ui.menu.classList.remove('hidden');
+        }
+
+        startFullMode() {
+            this.isFullMode = true;
+            const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
+            this.generateQuiz(pool, pool.length);
+        }
+
+        showCountDialog() {
+            this.showModal(`
+                <h3 class="text-xl font-bold mb-4">問題数指定</h3>
+                <input type="number" id="quiz-count-input" value="10" min="1" max="${VERB_DATA.length}" class="w-full p-3 border rounded mb-4">
+                <button onclick="quizApp.startCustomCount()" class="w-full bg-indigo-600 text-white p-3 rounded font-bold">開始</button>
+            `);
+        }
+
+        startCustomCount() {
+            const countInput = document.getElementById('quiz-count-input');
+            const count = parseInt(countInput.value) || 10;
+            this.closeModal();
+            this.isFullMode = false;
+            const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
+            this.generateQuiz(pool, count);
+        }
+
+        startMistakeMode() {
+            const stats = this.getMistakeStats();
+            const indices = Object.keys(stats).map(Number);
+            if (indices.length === 0) {
+                alert("間違い履歴がありません。");
+                return;
+            }
+            this.isFullMode = false;
+            const pool = indices.sort((a, b) => stats[b] - stats[a]).map(idx => VERB_DATA[idx]);
+            this.generateQuiz(pool, pool.length);
+        }
+
+        getMistakeStats() {
+            return this.history.reduce((acc, curr) => {
+                if (!curr.isCorrect) acc[curr.verbIndex] = (acc[curr.verbIndex] || 0) + 1;
+                return acc;
+            }, {});
+        }
+
+        generateQuiz(pool, count) {
+            this.currentQuiz = pool.slice(0, count).map(verb => {
+                const verbIndex = VERB_DATA.findIndex(v => v.ja === verb.ja);
+                return { verbIndex, ...verb };
+            });
+            this.currentIndex = 0;
+            this.score = 0;
+            this.ui.menu.classList.add('hidden');
+            this.ui.quiz.classList.remove('hidden');
+            this.showQuestion();
+        }
+
+        showQuestion() {
+            const q = this.currentQuiz[this.currentIndex];
+            this.ui.jp.innerText = q.ja;
+            this.ui.aiCoaching.classList.add('hidden');
+            Object.values(this.ui.inputs).forEach(input => {
+                input.value = "";
+                input.classList.remove('correct-input', 'wrong-input');
+                input.disabled = false;
+            });
+            this.ui.feedback.innerHTML = "";
+            this.ui.status.innerText = `Question ${this.currentIndex + 1} / ${this.currentQuiz.length}`;
+            this.ui.progress.style.width = `${(this.currentIndex / this.currentQuiz.length) * 100}%`;
+            this.ui.inputs.present.focus();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = false;
+            btn.innerText = "判定";
+            btn.onclick = () => this.checkAnswer();
+        }
+
+        checkAnswer() {
+            const q = this.currentQuiz[this.currentIndex];
+            const check = (user, actual) => {
+                const norm = user.trim().toLowerCase();
+                return actual.toLowerCase().split('/').some(a => a.trim() === norm);
+            };
+
+            const isPresentCorrect = check(this.ui.inputs.present.value, q.present);
+            const isPastCorrect = check(this.ui.inputs.past.value, q.past);
+            const isPPCorrect = check(this.ui.inputs.pp.value, q.pp);
+            const isAllCorrect = isPresentCorrect && isPastCorrect && isPPCorrect;
+
+            this.ui.inputs.present.classList.add(isPresentCorrect ? 'correct-input' : 'wrong-input');
+            this.ui.inputs.past.classList.add(isPastCorrect ? 'correct-input' : 'wrong-input');
+            this.ui.inputs.pp.classList.add(isPPCorrect ? 'correct-input' : 'wrong-input');
+
+            this.saveResult(q.verbIndex, isAllCorrect);
+            if (isAllCorrect) {
+                this.score++;
+                this.ui.feedback.innerHTML = `<div class="text-green-600 font-bold text-xl mt-2">PERFECT!</div>`;
+            } else {
+                this.ui.feedback.innerHTML = `<div class="text-red-500 text-sm mt-1">正解: <span class="font-bold">${q.present} - ${q.past} - ${q.pp}</span></div>`;
+            }
+
+            Object.values(this.ui.inputs).forEach(input => input.disabled = true);
+            this.fetchAICoaching(q);
+
+            const btn = document.getElementById('submit-btn');
+            btn.innerText = "次へ";
+            btn.onclick = () => this.nextQuestion();
+        }
+
+        nextQuestion() {
+            this.currentIndex++;
+            if (this.currentIndex < this.currentQuiz.length) this.showQuestion();
+            else this.showResult();
+        }
+
+        showResult() {
+            this.ui.quiz.classList.add('hidden');
+            this.ui.result.classList.remove('hidden');
+            this.ui.score.innerText = `${this.score} / ${this.currentQuiz.length}`;
+            if (this.isFullMode) this.updateRanking();
+        }
+
+        updateRanking() {
+            const entry = { score: this.score, total: this.currentQuiz.length, date: new Date().toLocaleString('ja-JP') };
+            this.ranking.push(entry);
+            this.ranking.sort((a, b) => b.score - a.score);
+            this.ranking = this.ranking.slice(0, 5);
+            localStorage.setItem('verb_ranking_v2', JSON.stringify(this.ranking));
+            this.ui.rankingNotice.classList.toggle('hidden', !this.ranking.some(r => r.date === entry.date));
+        }
+
+        showAnalysis() {
+            const stats = this.getMistakeStats();
+            const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+            const listHtml = sorted.length > 0 
+                ? sorted.map(([idx, count]) => {
+                    const v = VERB_DATA[idx];
+                    return `<div class="flex justify-between items-center border-b py-3"><div><div class="font-bold">${v.ja}</div><div class="text-xs text-slate-500">${v.present}/${v.past}/${v.pp}</div></div><div class="bg-red-100 text-red-600 px-3 py-1 rounded-full font-bold text-sm">${count}回ミス</div></div>`;
+                }).join('')
+                : '<div class="text-center py-8 text-slate-400">ミスなし。</div>';
+            this.showModal(`<div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-red-600">誤答分析</h3><button onclick="quizApp.closeModal()">✕</button></div><div class="space-y-1">${listHtml}</div>`);
+        }
+
+        showRanking() {
+            const listHtml = this.ranking.length > 0 
+                ? this.ranking.map((r, i) => `<div class="flex justify-between items-center border-b py-3"><div class="flex items-center"><span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold mr-3">${i+1}</span><div class="text-xs text-slate-500">${r.date}</div></div><div class="font-bold text-lg text-indigo-600">${r.score}/${r.total}</div></div>`).join('')
+                : '<div class="text-center py-8 text-slate-400">記録なし。</div>';
+            this.showModal(`<div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold">ランキング</h3><button onclick="quizApp.closeModal()">✕</button></div><div class="space-y-1">${listHtml}</div>`);
+        }
+
+        showVerbList() {
+            let rows = VERB_DATA.map(v => `<tr onclick="quizApp.showAIExample('${v.present}', '${v.ja}')" class="border-b text-sm cursor-pointer hover:bg-indigo-50"><td class="py-2 font-bold">${v.ja}</td><td class="py-2">${v.present}</td><td class="py-2">${v.past}</td><td class="py-2">${v.pp}</td></tr>`).join('');
+            this.showModal(`<div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold">一覧</h3><button onclick="quizApp.closeModal()">✕</button></div><div id="ai-example-box" class="mb-4 min-h-[40px]"></div><div class="overflow-y-auto max-h-[40vh]"><table class="w-full text-left"><thead><tr class="text-xs text-slate-400 uppercase border-b sticky top-0 bg-white"><th class="pb-2">意味</th><th class="pb-2">原形</th><th class="pb-2">過去</th><th class="pb-2">分詞</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+        }
+    }
+
+    const quizApp = new QuizApp();
+    document.getElementById('modal-overlay').addEventListener('click', (e) => {
+        if(e.target.id === 'modal-overlay') quizApp.closeModal();
+    });
+</script>
+
+</body>
+</html>
