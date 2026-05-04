@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -34,60 +33,57 @@
         .correct-input { border-color: #10b981 !important; background-color: #ecfdf5; }
         .wrong-input { border-color: #ef4444 !important; background-color: #fef2f2; }
 
-```
-    /* フィードバックアニメーション */
-    @keyframes feedback-pop {
-        0%   { transform: scale(0.5) translateY(10px); opacity: 0; }
-        60%  { transform: scale(1.15) translateY(-4px); opacity: 1; }
-        100% { transform: scale(1) translateY(0); opacity: 1; }
-    }
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        20%       { transform: translateX(-8px); }
-        40%       { transform: translateX(8px); }
-        60%       { transform: translateX(-6px); }
-        80%       { transform: translateX(6px); }
-    }
-    .feedback-correct {
-        animation: feedback-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    .feedback-wrong {
-        animation: shake 0.4s ease forwards;
-    }
+        /* フィードバックアニメーション */
+        @keyframes feedback-pop {
+            0%   { transform: scale(0.5) translateY(10px); opacity: 0; }
+            60%  { transform: scale(1.15) translateY(-4px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-8px); }
+            40%       { transform: translateX(8px); }
+            60%       { transform: translateX(-6px); }
+            80%       { transform: translateX(6px); }
+        }
+        .feedback-correct {
+            animation: feedback-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .feedback-wrong {
+            animation: shake 0.4s ease forwards;
+        }
 
-    /* 結果画面アニメーション */
-    @keyframes result-in {
-        0%   { transform: scale(0.7) translateY(30px); opacity: 0; }
-        70%  { transform: scale(1.05) translateY(-5px); opacity: 1; }
-        100% { transform: scale(1) translateY(0); opacity: 1; }
-    }
-    @keyframes score-count {
-        0%   { transform: scale(0.8); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-    @keyframes confetti-fall {
-        0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
-    }
-    .result-animate {
-        animation: result-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    .score-animate {
-        animation: score-count 0.4s ease 0.3s both;
-    }
-    .message-animate {
-        animation: score-count 0.4s ease 0.6s both;
-    }
-    .confetti-piece {
-        position: absolute;
-        width: 8px; height: 8px;
-        border-radius: 2px;
-        animation: confetti-fall 1s ease forwards;
-    }
-    #result-area { position: relative; overflow: hidden; }
-</style>
-```
-
+        /* 結果画面アニメーション */
+        @keyframes result-in {
+            0%   { transform: scale(0.7) translateY(30px); opacity: 0; }
+            70%  { transform: scale(1.05) translateY(-5px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes score-count {
+            0%   { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes confetti-fall {
+            0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
+        }
+        .result-animate {
+            animation: result-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .score-animate {
+            animation: score-count 0.4s ease 0.3s both;
+        }
+        .message-animate {
+            animation: score-count 0.4s ease 0.6s both;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 8px; height: 8px;
+            border-radius: 2px;
+            animation: confetti-fall 1s ease forwards;
+        }
+        #result-area { position: relative; overflow: hidden; }
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800">
 
@@ -97,85 +93,88 @@
         <p class="text-slate-500 mt-2">made by OIKAWA</p>
     </header>
 
-```
-<div id="menu" class="space-y-4">
-    <button onclick="quizApp.startFullMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
-        <div>
-            <div class="font-bold text-lg">全問モード</div>
-            <div class="text-sm text-slate-500">全59動詞に挑戦</div>
+    <div id="menu" class="space-y-4">
+        <button onclick="quizApp.startFullMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
+            <div>
+                <div class="font-bold text-lg">全問モード</div>
+                <div class="text-sm text-slate-500">全59動詞に挑戦</div>
+            </div>
+            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+
+        <button onclick="quizApp.showCountDialog()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
+            <div>
+                <div class="font-bold text-lg">問題数指定モード</div>
+                <div class="text-sm text-slate-500">任意の数だけ出題</div>
+            </div>
+            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+
+        <button onclick="quizApp.startMistakeMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
+            <div>
+                <div class="font-bold text-lg">弱点克服モード</div>
+                <div class="text-sm text-slate-500">誤答履歴から優先出題</div>
+            </div>
+            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="quizApp.showAnalysis()" class="p-4 glass-card hover:bg-red-50 border border-transparent hover:border-red-200 transition-all text-red-600 font-bold">誤答分析</button>
+            <button onclick="quizApp.showRanking()" class="p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all font-bold">ランキング</button>
         </div>
-        <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
-    </button>
-
-    <button onclick="quizApp.showCountDialog()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
-        <div>
-            <div class="font-bold text-lg">問題数指定モード</div>
-            <div class="text-sm text-slate-500">任意の数だけ出題</div>
-        </div>
-        <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
-    </button>
-
-    <button onclick="quizApp.startMistakeMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
-        <div>
-            <div class="font-bold text-lg">弱点克服モード</div>
-            <div class="text-sm text-slate-500">誤答履歴から優先出題</div>
-        </div>
-        <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
-    </button>
-
-    <div class="grid grid-cols-2 gap-4">
-        <button onclick="quizApp.showAnalysis()" class="p-4 glass-card hover:bg-red-50 border border-transparent hover:border-red-200 transition-all text-red-600 font-bold">誤答分析</button>
-        <button onclick="quizApp.showRanking()" class="p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all font-bold">ランキング</button>
-    </div>
-    <button onclick="quizApp.showVerbList()" class="w-full p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all font-bold">不規則動詞一覧</button>
-</div>
-
-<!-- QUIZ AREA -->
-<div id="quiz-area" class="hidden glass-card p-6 shadow-xl relative">
-    <div id="progress-bar" class="absolute top-0 left-0 h-1 bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
-    <div class="flex justify-between items-center mb-6">
-        <span id="quiz-status" class="text-sm font-medium text-slate-400">Question 1/10</span>
-        <button onclick="quizApp.exitToMenu()" class="text-sm text-red-400">終了</button>
-    </div>
-    <div class="text-center mb-6">
-        <div id="japanese-word" class="text-4xl font-bold text-slate-700">---</div>
-        <p class="text-xs text-slate-400 mt-2">1文字ずつ入力してください（予測変換不可仕様）</p>
+        <button onclick="quizApp.showVerbList()" class="w-full p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all font-bold">不規則動詞一覧</button>
     </div>
 
-    <div class="space-y-6">
-        <div>
-            <label class="text-xs font-bold text-slate-400">原形 (Present)</label>
-            <div id="container-present" class="flex flex-wrap gap-1 mt-1"></div>
+    <!-- QUIZ AREA -->
+    <div id="quiz-area" class="hidden glass-card p-6 shadow-xl relative">
+        <div id="progress-bar" class="absolute top-0 left-0 h-1 bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
+        <div class="flex justify-between items-center mb-6">
+            <span id="quiz-status" class="text-sm font-medium text-slate-400">Question 1/10</span>
+            <button onclick="quizApp.exitToMenu()" class="text-sm text-red-400">終了</button>
         </div>
-        <div>
-            <label class="text-xs font-bold text-slate-400">過去形 (Past)</label>
-            <div id="container-past" class="flex flex-wrap gap-1 mt-1"></div>
+        <div class="text-center mb-6">
+            <div id="japanese-word" class="text-4xl font-bold text-slate-700">---</div>
+            <p class="text-xs text-slate-400 mt-2">1文字ずつ入力してください（予測変換不可仕様）</p>
         </div>
-        <div>
-            <label class="text-xs font-bold text-slate-400">過去分詞形 (Past Participle)</label>
-            <div id="container-pp" class="flex flex-wrap gap-1 mt-1"></div>
+
+        <div class="space-y-6">
+            <div>
+                <label class="text-xs font-bold text-slate-400">原形 (Present)</label>
+                <div id="container-present" class="flex flex-wrap gap-1 mt-1"></div>
+            </div>
+            <div>
+                <label id="label-past" class="text-xs font-bold text-slate-400">過去形 (Past)</label>
+                <div id="container-past" class="flex flex-wrap gap-1 mt-1"></div>
+                <!-- was/were 用2つ目の入力欄 -->
+                <div id="past2-wrapper" class="hidden mt-2">
+                    <label class="text-xs font-bold text-slate-400">過去形 2つ目 (Past 2nd)</label>
+                    <div id="container-past2" class="flex flex-wrap gap-1 mt-1"></div>
+                    <p class="text-xs text-indigo-500 font-bold mt-1">※ 過去形 は順不同</p>
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-400">過去分詞形 (Past Participle)</label>
+                <div id="container-pp" class="flex flex-wrap gap-1 mt-1"></div>
+            </div>
+            
+            <button id="submit-btn" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg">回答</button>
         </div>
-        
-        <button id="submit-btn" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg">回答</button>
+
+        <div id="feedback" class="text-center mt-4 min-h-[80px] flex flex-col items-center justify-center"></div>
     </div>
 
-    <div id="feedback" class="text-center mt-4 min-h-[80px] flex flex-col items-center justify-center"></div>
-</div>
+    <!-- RESULT AREA -->
+    <div id="result-area" class="hidden glass-card p-8 text-center">
+        <div class="text-5xl mb-4">📊</div>
+        <h2 class="text-2xl font-bold mb-2">結果発表</h2>
+        <div id="score-display" class="text-4xl font-bold text-indigo-600 mb-6">0 / 0</div>
+        <div id="score-message" class="text-lg text-slate-600 mb-6 px-4 py-2 bg-slate-50 rounded-lg"></div>
+        <button onclick="quizApp.exitToMenu()" class="w-full py-4 bg-slate-800 text-white rounded-xl font-bold">メニューへ</button>
+    </div>
 
-<!-- RESULT AREA -->
-<div id="result-area" class="hidden glass-card p-8 text-center">
-    <div class="text-5xl mb-4">📊</div>
-    <h2 class="text-2xl font-bold mb-2">結果発表</h2>
-    <div id="score-display" class="text-4xl font-bold text-indigo-600 mb-6">0 / 0</div>
-    <div id="score-message" class="text-lg text-slate-600 mb-6 px-4 py-2 bg-slate-50 rounded-lg"></div>
-    <button onclick="quizApp.exitToMenu()" class="w-full py-4 bg-slate-800 text-white rounded-xl font-bold">メニューへ</button>
-</div>
-
-<div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-    <div id="modal-content" class="bg-white rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-6"></div>
-</div>
-```
-
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div id="modal-content" class="bg-white rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-6"></div>
+    </div>
 </div>
 
 <script>
@@ -277,8 +276,10 @@
                 containers: {
                     present: document.getElementById('container-present'),
                     past: document.getElementById('container-past'),
+                    past2: document.getElementById('container-past2'),
                     pp: document.getElementById('container-pp')
-                }
+                },
+                past2Wrapper: document.getElementById('past2-wrapper')
             };
         }
 
@@ -311,9 +312,20 @@
         }
 
         handleEnter(containerId) {
-            if (containerId === 'present') this.ui.containers.past.children[0].focus();
-            else if (containerId === 'past') this.ui.containers.pp.children[0].focus();
-            else this.checkAnswer();
+            if (containerId === 'present') {
+                this.ui.containers.past.children[0].focus();
+            } else if (containerId === 'past') {
+                // was/were の場合は past2 へ、それ以外は pp へ
+                if (!this.ui.past2Wrapper.classList.contains('hidden')) {
+                    this.ui.containers.past2.children[0].focus();
+                } else {
+                    this.ui.containers.pp.children[0].focus();
+                }
+            } else if (containerId === 'past2') {
+                this.ui.containers.pp.children[0].focus();
+            } else {
+                this.checkAnswer();
+            }
         }
 
         getWordFromInputs(containerId) {
@@ -379,7 +391,16 @@
             this.ui.status.innerText = `Question ${this.currentIndex + 1} / ${this.currentQuiz.length}`;
             this.ui.progress.style.width = `${(this.currentIndex / this.currentQuiz.length) * 100}%`;
             this.createInputRow('present', q.present);
-            this.createInputRow('past', q.past);
+            // was/were の場合は2欄表示
+            const isWasWere = q.past === 'was/were';
+            if (isWasWere) {
+                this.ui.past2Wrapper.classList.remove('hidden');
+                this.createInputRow('past', 'was');   // 1欄目: was
+                this.createInputRow('past2', 'were');  // 2欄目: were
+            } else {
+                this.ui.past2Wrapper.classList.add('hidden');
+                this.createInputRow('past', q.past);
+            }
             this.createInputRow('pp', q.pp);
             this.ui.containers.present.children[0].focus();
             this.ui.submitBtn.innerText = "回答";
@@ -389,23 +410,47 @@
         checkAnswer() {
             const q = this.currentQuiz[this.currentIndex];
             const uPresent = this.getWordFromInputs('present');
-            const uPast = this.getWordFromInputs('past');
-            const uPP = this.getWordFromInputs('pp');
+            const uPast    = this.getWordFromInputs('past');
+            const uPP      = this.getWordFromInputs('pp');
 
             const check = (user, actual) => {
                 const alts = actual.toLowerCase().split('/').map(s => s.trim());
                 return alts.includes(user.toLowerCase());
             };
 
-            const pOk = check(uPresent, q.present);
-            const paOk = check(uPast, q.past);
-            const ppOk = check(uPP, q.pp);
-            const allOk = pOk && paOk && ppOk;
+            const pOk  = check(uPresent, q.present);
+            let paOk, ppOk;
 
-            // 入力欄に色付け
+            if (q.past === 'was/were') {
+                // 2欄を順不同で判定: {was, were} が両方揃っていれば正解
+                const uPast2 = this.getWordFromInputs('past2');
+                const answers = new Set([uPast.toLowerCase(), uPast2.toLowerCase()]);
+                paOk = answers.has('was') && answers.has('were');
+                ppOk = check(uPP, q.pp);
+
+                // 色付け: まとめて正否を反映
+                const cls = paOk ? 'correct-input' : 'wrong-input';
+                [this.ui.containers.past, this.ui.containers.past2].forEach(cont => {
+                    Array.from(cont.children).forEach((inp, i) => {
+                        if (i < 5) inp.classList.add(cls); // was/were は最大5文字
+                    });
+                });
+                if (!paOk) {
+                    // 正解を表示 (was → 1欄目, were → 2欄目)
+                    'was'.split('').forEach((c, i) => { if (this.ui.containers.past.children[i]) this.ui.containers.past.children[i].value = c; });
+                    'were'.split('').forEach((c, i) => { if (this.ui.containers.past2.children[i]) this.ui.containers.past2.children[i].value = c; });
+                }
+                this.colorInputs('pp', uPP, q.pp, ppOk);
+            } else {
+                paOk = check(uPast, q.past);
+                ppOk = check(uPP, q.pp);
+                this.colorInputs('past', uPast, q.past, paOk);
+                this.colorInputs('pp', uPP, q.pp, ppOk);
+            }
+
+            const allOk = pOk && paOk && ppOk;
+            // 入力欄に色付け (present は共通)
             this.colorInputs('present', uPresent, q.present, pOk);
-            this.colorInputs('past', uPast, q.past, paOk);
-            this.colorInputs('pp', uPP, q.pp, ppOk);
 
             if (allOk) {
                 this.score++;
@@ -593,6 +638,5 @@
         if (e.target === document.getElementById('modal-overlay')) quizApp.closeModal();
     });
 </script>
-
 </body>
 </html>
