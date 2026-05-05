@@ -33,7 +33,6 @@
         .correct-input { border-color: #10b981 !important; background-color: #ecfdf5; }
         .wrong-input { border-color: #ef4444 !important; background-color: #fef2f2; }
 
-        /* フィードバックアニメーション */
         @keyframes feedback-pop {
             0%   { transform: scale(0.5) translateY(10px); opacity: 0; }
             60%  { transform: scale(1.15) translateY(-4px); opacity: 1; }
@@ -53,7 +52,6 @@
             animation: shake 0.4s ease forwards;
         }
 
-        /* 結果画面アニメーション */
         @keyframes result-in {
             0%   { transform: scale(0.7) translateY(30px); opacity: 0; }
             70%  { transform: scale(1.05) translateY(-5px); opacity: 1; }
@@ -90,7 +88,8 @@
 <div id="app" class="max-w-2xl mx-auto p-4 md:p-8">
     <header class="text-center mb-8">
         <h1 class="text-3xl font-bold text-indigo-700">不規則動詞マスター</h1>
-        <p class="text-slate-500 mt-2">made by OIKAWA</p>
+        <p class="text-slate-500 mt-2">made by OIKAWA </p>
+<p class="text-slate-500 mt-2">ver1.1</p>
     </header>
 
     <div id="menu" class="space-y-4">
@@ -100,6 +99,14 @@
                 <div class="text-sm text-slate-500">全59動詞に挑戦</div>
             </div>
             <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+
+        <button onclick="quizApp.startJuniorMode()" class="w-full p-4 glass-card hover:bg-green-50 border border-transparent hover:border-green-200 transition-all text-left flex justify-between items-center group">
+            <div>
+                <div class="font-bold text-lg text-green-700">１・２年生モード</div>
+                <div class="text-sm text-slate-500">原形と過去形のみ（過去分詞なし）</div>
+            </div>
+            <span class="text-green-500 group-hover:translate-x-1 transition-transform">→</span>
         </button>
 
         <button onclick="quizApp.showCountDialog()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
@@ -134,27 +141,31 @@
         </div>
         <div class="text-center mb-6">
             <div id="japanese-word" class="text-4xl font-bold text-slate-700">---</div>
-            <p class="text-xs text-slate-400 mt-2">1文字ずつ入力してください（予測変換不可仕様）</p>
+            <p class="text-xs text-slate-400 mt-2">1文字ずつ入力してください</p>
         </div>
 
         <div class="space-y-6">
             <div>
                 <label class="text-xs font-bold text-slate-400">原形 (Present)</label>
                 <div id="container-present" class="flex flex-wrap gap-1 mt-1"></div>
+                <div id="ans-present" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem]"></div>
             </div>
             <div>
                 <label id="label-past" class="text-xs font-bold text-slate-400">過去形 (Past)</label>
                 <div id="container-past" class="flex flex-wrap gap-1 mt-1"></div>
-                <!-- was/were 用2つ目の入力欄 -->
-                <div id="past2-wrapper" class="hidden mt-2">
+                <div id="ans-past" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem]"></div>
+                
+                <div id="past2-wrapper" class="hidden mt-4">
                     <label class="text-xs font-bold text-slate-400">過去形 2つ目 (Past 2nd)</label>
                     <div id="container-past2" class="flex flex-wrap gap-1 mt-1"></div>
+                    <div id="ans-past2" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem]"></div>
                     <p class="text-xs text-indigo-500 font-bold mt-1">※ 過去形 は順不同</p>
                 </div>
             </div>
-            <div>
+            <div id="pp-wrapper">
                 <label class="text-xs font-bold text-slate-400">過去分詞形 (Past Participle)</label>
                 <div id="container-pp" class="flex flex-wrap gap-1 mt-1"></div>
+                <div id="ans-pp" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem]"></div>
             </div>
             
             <button id="submit-btn" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg">回答</button>
@@ -240,7 +251,6 @@
         {ja: "飛ぶ", present: "fly", past: "flew", pp: "flown"}
     ];
 
-    // 全問モード専用スコアメッセージ (59問満点基準)
     function getFullModeMessage(score) {
         if (score === 0)  return "舐めてんのか？";
         if (score <= 20)  return "チョベリバ";
@@ -259,6 +269,7 @@
             this.currentIndex = 0;
             this.score = 0;
             this.isFullMode = false;
+            this.mode = 'normal'; // 'normal' or 'junior'
             
             this.ui = {
                 menu: document.getElementById('menu'),
@@ -279,7 +290,14 @@
                     past2: document.getElementById('container-past2'),
                     pp: document.getElementById('container-pp')
                 },
-                past2Wrapper: document.getElementById('past2-wrapper')
+                answers: {
+                    present: document.getElementById('ans-present'),
+                    past: document.getElementById('ans-past'),
+                    past2: document.getElementById('ans-past2'),
+                    pp: document.getElementById('ans-pp')
+                },
+                past2Wrapper: document.getElementById('past2-wrapper'),
+                ppWrapper: document.getElementById('pp-wrapper')
             };
         }
 
@@ -315,14 +333,19 @@
             if (containerId === 'present') {
                 this.ui.containers.past.children[0].focus();
             } else if (containerId === 'past') {
-                // was/were の場合は past2 へ、それ以外は pp へ
                 if (!this.ui.past2Wrapper.classList.contains('hidden')) {
                     this.ui.containers.past2.children[0].focus();
+                } else if (this.mode === 'junior') {
+                    this.checkAnswer();
                 } else {
                     this.ui.containers.pp.children[0].focus();
                 }
             } else if (containerId === 'past2') {
-                this.ui.containers.pp.children[0].focus();
+                if (this.mode === 'junior') {
+                    this.checkAnswer();
+                } else {
+                    this.ui.containers.pp.children[0].focus();
+                }
             } else {
                 this.checkAnswer();
             }
@@ -334,6 +357,14 @@
 
         startFullMode() {
             this.isFullMode = true;
+            this.mode = 'normal';
+            const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
+            this.generateQuiz(pool, pool.length);
+        }
+
+        startJuniorMode() {
+            this.isFullMode = false;
+            this.mode = 'junior';
             const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
             this.generateQuiz(pool, pool.length);
         }
@@ -350,6 +381,7 @@
             const count = parseInt(document.getElementById('quiz-count-input').value) || 10;
             this.closeModal();
             this.isFullMode = false;
+            this.mode = 'normal';
             const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
             this.generateQuiz(pool, count);
         }
@@ -362,6 +394,7 @@
                 return;
             }
             this.isFullMode = false;
+            this.mode = 'normal';
             const pool = indices.sort((a, b) => stats[b] - stats[a]).map(idx => VERB_DATA[idx]);
             this.generateQuiz(pool, pool.length);
         }
@@ -390,18 +423,29 @@
             this.ui.feedback.innerHTML = "";
             this.ui.status.innerText = `Question ${this.currentIndex + 1} / ${this.currentQuiz.length}`;
             this.ui.progress.style.width = `${(this.currentIndex / this.currentQuiz.length) * 100}%`;
+            
+            // 各正解表示をリセット
+            Object.values(this.ui.answers).forEach(el => el.innerText = "");
+
             this.createInputRow('present', q.present);
-            // was/were の場合は2欄表示
+            
             const isWasWere = q.past === 'was/were';
             if (isWasWere) {
                 this.ui.past2Wrapper.classList.remove('hidden');
-                this.createInputRow('past', 'was');   // 1欄目: was
-                this.createInputRow('past2', 'were');  // 2欄目: were
+                this.createInputRow('past', 'was');
+                this.createInputRow('past2', 'were');
             } else {
                 this.ui.past2Wrapper.classList.add('hidden');
                 this.createInputRow('past', q.past);
             }
-            this.createInputRow('pp', q.pp);
+
+            if (this.mode === 'junior') {
+                this.ui.ppWrapper.classList.add('hidden');
+            } else {
+                this.ui.ppWrapper.classList.remove('hidden');
+                this.createInputRow('pp', q.pp);
+            }
+
             this.ui.containers.present.children[0].focus();
             this.ui.submitBtn.innerText = "回答";
             this.ui.submitBtn.onclick = () => this.checkAnswer();
@@ -411,7 +455,7 @@
             const q = this.currentQuiz[this.currentIndex];
             const uPresent = this.getWordFromInputs('present');
             const uPast    = this.getWordFromInputs('past');
-            const uPP      = this.getWordFromInputs('pp');
+            const uPP      = this.mode === 'junior' ? "" : this.getWordFromInputs('pp');
 
             const check = (user, actual) => {
                 const alts = actual.toLowerCase().split('/').map(s => s.trim());
@@ -419,45 +463,46 @@
             };
 
             const pOk  = check(uPresent, q.present);
-            let paOk, ppOk;
+            let paOk, ppOk = true;
 
             if (q.past === 'was/were') {
-                // 2欄を順不同で判定: {was, were} が両方揃っていれば正解
                 const uPast2 = this.getWordFromInputs('past2');
                 const answers = new Set([uPast.toLowerCase(), uPast2.toLowerCase()]);
                 paOk = answers.has('was') && answers.has('were');
-                ppOk = check(uPP, q.pp);
-
-                // 色付け: まとめて正否を反映
+                
                 const cls = paOk ? 'correct-input' : 'wrong-input';
                 [this.ui.containers.past, this.ui.containers.past2].forEach(cont => {
-                    Array.from(cont.children).forEach((inp, i) => {
-                        if (i < 5) inp.classList.add(cls); // was/were は最大5文字
+                    Array.from(cont.children).forEach((inp) => {
+                        if (inp.value) inp.classList.add(cls);
+                        else if (!paOk) inp.classList.add('wrong-input');
                     });
                 });
                 if (!paOk) {
-                    // 正解を表示 (was → 1欄目, were → 2欄目)
-                    'was'.split('').forEach((c, i) => { if (this.ui.containers.past.children[i]) this.ui.containers.past.children[i].value = c; });
-                    'were'.split('').forEach((c, i) => { if (this.ui.containers.past2.children[i]) this.ui.containers.past2.children[i].value = c; });
+                    this.ui.answers.past.innerText = "正解: was";
+                    this.ui.answers.past2.innerText = "正解: were";
                 }
-                this.colorInputs('pp', uPP, q.pp, ppOk);
             } else {
                 paOk = check(uPast, q.past);
-                ppOk = check(uPP, q.pp);
-                this.colorInputs('past', uPast, q.past, paOk);
-                this.colorInputs('pp', uPP, q.pp, ppOk);
+                this.colorInputsOnly('past', uPast, paOk);
+                if (!paOk) this.ui.answers.past.innerText = `正解: ${q.past}`;
             }
 
+            if (this.mode !== 'junior') {
+                ppOk = check(uPP, q.pp);
+                this.colorInputsOnly('pp', uPP, ppOk);
+                if (!ppOk) this.ui.answers.pp.innerText = `正解: ${q.pp}`;
+            }
+
+            this.colorInputsOnly('present', uPresent, pOk);
+            if (!pOk) this.ui.answers.present.innerText = `正解: ${q.present}`;
+
             const allOk = pOk && paOk && ppOk;
-            // 入力欄に色付け (present は共通)
-            this.colorInputs('present', uPresent, q.present, pOk);
 
             if (allOk) {
                 this.score++;
                 this.ui.feedback.innerHTML = `<span class="feedback-correct inline-block text-green-500 font-black" style="font-size:3rem;">✓ 正解！</span>`;
             } else {
-                const ans = `${q.present} - ${q.past} - ${q.pp}`;
-                this.ui.feedback.innerHTML = `<span class="feedback-wrong inline-block text-red-500 font-black" style="font-size:3rem;">✗ 不正解</span><br><span class="text-base text-slate-600 mt-1 inline-block">正解: <strong>${ans}</strong></span>`;
+                this.ui.feedback.innerHTML = `<span class="feedback-wrong inline-block text-red-500 font-black" style="font-size:3rem;">✗ 不正解</span>`;
             }
 
             this.history.push({ verbIndex: q.verbIndex, isCorrect: allOk, ts: Date.now() });
@@ -467,13 +512,13 @@
             this.ui.submitBtn.onclick = () => this.nextQuestion();
         }
 
-        colorInputs(containerId, userWord, actual, isOk) {
+        colorInputsOnly(containerId, userWord, isOk) {
             const container = this.ui.containers[containerId];
-            const correctWord = actual.split('/')[0].trim(); // 表示用は最初の候補
-            Array.from(container.children).forEach((inp, i) => {
-                if (i < userWord.length || i < correctWord.length) {
+            Array.from(container.children).forEach((inp) => {
+                if (inp.value) {
                     inp.classList.add(isOk ? 'correct-input' : 'wrong-input');
-                    if (!isOk && i < correctWord.length) inp.value = correctWord[i];
+                } else if (!isOk) {
+                    inp.classList.add('wrong-input');
                 }
             });
         }
@@ -503,13 +548,12 @@
                 else                  message = "もっと練習が必要です。";
             }
 
-            // アニメーション付きで表示
             const resultCard = this.ui.result;
             resultCard.classList.add('result-animate');
             setTimeout(() => resultCard.classList.remove('result-animate'), 600);
 
             this.ui.score.classList.remove('score-animate');
-            void this.ui.score.offsetWidth; // reflow
+            void this.ui.score.offsetWidth;
             this.ui.score.classList.add('score-animate');
             this.ui.score.innerText = `${this.score} / ${total}`;
 
@@ -518,13 +562,11 @@
             this.ui.message.classList.add('message-animate');
             this.ui.message.innerText = message;
 
-            // 全問正解時は紙吹雪
             if (this.isFullMode && this.score === total) {
                 this.launchConfetti();
             }
 
-            // ランキング保存
-            this.ranking.push({ score: this.score, total, ts: Date.now() });
+            this.ranking.push({ score: this.score, total, ts: Date.now(), mode: this.mode });
             this.ranking.sort((a, b) => (b.score / b.total) - (a.score / a.total));
             this.ranking = this.ranking.slice(0, 10);
             localStorage.setItem('verb_ranking_v2', JSON.stringify(this.ranking));
@@ -588,9 +630,10 @@
             const rows = this.ranking.map((r, i) => {
                 const pct = Math.round((r.score / r.total) * 100);
                 const date = new Date(r.ts).toLocaleDateString('ja-JP');
+                const mLabel = r.mode === 'junior' ? '<span class="text-[10px] bg-green-100 text-green-600 px-1 rounded">1-2年</span>' : '';
                 return `<tr class="border-b">
                     <td class="py-2 pr-3 font-bold">${i + 1}</td>
-                    <td class="py-2 pr-3">${r.score} / ${r.total}</td>
+                    <td class="py-2 pr-3">${r.score} / ${r.total} ${mLabel}</td>
                     <td class="py-2 pr-3">${pct}%</td>
                     <td class="py-2 text-slate-400 text-xs">${date}</td>
                 </tr>`;
