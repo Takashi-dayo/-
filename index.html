@@ -25,11 +25,7 @@
             background: white;
             ime-mode: disabled;
         }
-        .char-input:focus {
-            border-color: #6366f1;
-            outline: none;
-            background: #f8fafc;
-        }
+        .char-input:focus { border-color: #6366f1; outline: none; background: #f8fafc; }
         .correct-input { border-color: #10b981 !important; background-color: #ecfdf5; }
         .wrong-input { border-color: #ef4444 !important; background-color: #fef2f2; }
 
@@ -40,47 +36,25 @@
         }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%       { transform: translateX(-8px); }
-            40%       { transform: translateX(8px); }
-            60%       { transform: translateX(-6px); }
-            80%       { transform: translateX(6px); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
         }
-        .feedback-correct {
-            animation: feedback-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        .feedback-wrong {
-            animation: shake 0.4s ease forwards;
-        }
+        .feedback-correct { animation: feedback-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .feedback-wrong { animation: shake 0.4s ease forwards; }
 
-        @keyframes result-in {
-            0%   { transform: scale(0.7) translateY(30px); opacity: 0; }
-            70%  { transform: scale(1.05) translateY(-5px); opacity: 1; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
+        .speaker-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: all 0.2s;
         }
-        @keyframes score-count {
-            0%   { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes confetti-fall {
-            0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
-        }
-        .result-animate {
-            animation: result-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        .score-animate {
-            animation: score-count 0.4s ease 0.3s both;
-        }
-        .message-animate {
-            animation: score-count 0.4s ease 0.6s both;
-        }
-        .confetti-piece {
-            position: absolute;
-            width: 8px; height: 8px;
-            border-radius: 2px;
-            animation: confetti-fall 1s ease forwards;
-        }
-        #result-area { position: relative; overflow: hidden; }
+        .speaker-btn:hover { background: #cbd5e1; transform: scale(1.1); }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800">
@@ -89,40 +63,30 @@
     <header class="text-center mb-8">
         <h1 class="text-3xl font-bold text-indigo-700">不規則動詞マスター</h1>
         <p class="text-slate-500 mt-2">made by OIKAWA </p>
-<p class="text-slate-500 mt-2">ver1.1</p>
+        <div class="flex items-center justify-center gap-2 mt-2">
+            <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded">ver 1.5.0</span>
+            <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Voice Support</span>
+        </div>
     </header>
 
-    <div id="menu" class="space-y-4">
-        <button onclick="quizApp.startFullMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
-            <div>
-                <div class="font-bold text-lg">全問モード</div>
-                <div class="text-sm text-slate-500">全59動詞に挑戦</div>
-            </div>
-            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+    <div id="sub-menu" class="space-y-4">
+        <div class="flex items-center justify-between mb-4">
+            <h2 id="menu-title" class="text-xl font-bold text-indigo-700">通常モード</h2>
+        </div>
+
+        <button onclick="quizApp.startFullMode()" class="w-full p-4 glass-card hover:bg-slate-50 border border-transparent transition-all text-left flex justify-between items-center group">
+            <div class="font-bold text-lg">全問モード</div>
+            <span class="text-slate-400 group-hover:translate-x-1 transition-transform">→</span>
         </button>
 
-        <button onclick="quizApp.startJuniorMode()" class="w-full p-4 glass-card hover:bg-green-50 border border-transparent hover:border-green-200 transition-all text-left flex justify-between items-center group">
-            <div>
-                <div class="font-bold text-lg text-green-700">１・２年生モード</div>
-                <div class="text-sm text-slate-500">原形と過去形のみ（過去分詞なし）</div>
-            </div>
-            <span class="text-green-500 group-hover:translate-x-1 transition-transform">→</span>
+        <button onclick="quizApp.showCountDialog()" class="w-full p-4 glass-card hover:bg-slate-50 border border-transparent transition-all text-left flex justify-between items-center group">
+            <div class="font-bold text-lg">問題数指定モード</div>
+            <span class="text-slate-400 group-hover:translate-x-1 transition-transform">→</span>
         </button>
 
-        <button onclick="quizApp.showCountDialog()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
-            <div>
-                <div class="font-bold text-lg">問題数指定モード</div>
-                <div class="text-sm text-slate-500">任意の数だけ出題</div>
-            </div>
-            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
-        </button>
-
-        <button onclick="quizApp.startMistakeMode()" class="w-full p-4 glass-card hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all text-left flex justify-between items-center group">
-            <div>
-                <div class="font-bold text-lg">弱点克服モード</div>
-                <div class="text-sm text-slate-500">誤答履歴から優先出題</div>
-            </div>
-            <span class="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+        <button onclick="quizApp.startMistakeMode()" class="w-full p-4 glass-card hover:bg-slate-50 border border-transparent transition-all text-left flex justify-between items-center group">
+            <div class="font-bold text-lg">弱点克服モード</div>
+            <span class="text-slate-400 group-hover:translate-x-1 transition-transform">→</span>
         </button>
 
         <div class="grid grid-cols-2 gap-4">
@@ -130,14 +94,21 @@
             <button onclick="quizApp.showRanking()" class="p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all font-bold">ランキング</button>
         </div>
         <button onclick="quizApp.showVerbList()" class="w-full p-4 glass-card hover:bg-slate-50 border border-transparent hover:border-slate-300 transition-all font-bold">不規則動詞一覧</button>
+
+        <button id="mode-switch-btn" onclick="quizApp.toggleMode()" class="w-full mt-6 p-6 glass-card hover:bg-green-50 border-2 border-dashed border-green-200 transition-all text-left flex justify-between items-center group">
+            <div>
+                <div class="font-bold text-xl text-green-700">１・２年生はこちら</div>
+                <div class="text-sm text-slate-500">原形と過去形のみを出題するモードへ</div>
+            </div>
+            <span class="text-green-500 text-2xl group-hover:translate-x-1 transition-transform">→</span>
+        </button>
     </div>
 
-    <!-- QUIZ AREA -->
     <div id="quiz-area" class="hidden glass-card p-6 shadow-xl relative">
         <div id="progress-bar" class="absolute top-0 left-0 h-1 bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
         <div class="flex justify-between items-center mb-6">
             <span id="quiz-status" class="text-sm font-medium text-slate-400">Question 1/10</span>
-            <button onclick="quizApp.exitToMenu()" class="text-sm text-red-400">終了</button>
+            <button onclick="quizApp.exitToMenu()" class="text-sm text-red-400 font-bold">終了</button>
         </div>
         <div class="text-center mb-6">
             <div id="japanese-word" class="text-4xl font-bold text-slate-700">---</div>
@@ -148,33 +119,31 @@
             <div>
                 <label class="text-xs font-bold text-slate-400">原形 (Present)</label>
                 <div id="container-present" class="flex flex-wrap gap-1 mt-1"></div>
-                <div id="ans-present" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem]"></div>
+                <div id="ans-present" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem] flex items-center"></div>
             </div>
             <div>
                 <label id="label-past" class="text-xs font-bold text-slate-400">過去形 (Past)</label>
                 <div id="container-past" class="flex flex-wrap gap-1 mt-1"></div>
-                <div id="ans-past" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem]"></div>
+                <div id="ans-past" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem] flex items-center"></div>
                 
                 <div id="past2-wrapper" class="hidden mt-4">
                     <label class="text-xs font-bold text-slate-400">過去形 2つ目 (Past 2nd)</label>
                     <div id="container-past2" class="flex flex-wrap gap-1 mt-1"></div>
-                    <div id="ans-past2" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem]"></div>
-                    <p class="text-xs text-indigo-500 font-bold mt-1">※ 過去形 は順不同</p>
+                    <div id="ans-past2" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem] flex items-center"></div>
                 </div>
             </div>
             <div id="pp-wrapper">
                 <label class="text-xs font-bold text-slate-400">過去分詞形 (Past Participle)</label>
                 <div id="container-pp" class="flex flex-wrap gap-1 mt-1"></div>
-                <div id="ans-pp" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem]"></div>
+                <div id="ans-pp" class="text-xl font-bold text-indigo-600 mt-2 min-h-[1.5rem] flex items-center"></div>
             </div>
             
-            <button id="submit-btn" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg">回答</button>
+            <button id="submit-btn" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg transition-colors">回答</button>
         </div>
 
         <div id="feedback" class="text-center mt-4 min-h-[80px] flex flex-col items-center justify-center"></div>
     </div>
 
-    <!-- RESULT AREA -->
     <div id="result-area" class="hidden glass-card p-8 text-center">
         <div class="text-5xl mb-4">📊</div>
         <h2 class="text-2xl font-bold mb-2">結果発表</h2>
@@ -189,6 +158,12 @@
 </div>
 
 <script>
+    const APP_VERSION = "1.5.0";
+    const STORAGE_KEYS = {
+        HISTORY: 'verb_master_history',
+        RANKING: 'verb_master_ranking'
+    };
+
     const VERB_DATA = [
         {ja: "落ちる", present: "fall", past: "fell", pp: "fallen"},
         {ja: "見つける", present: "find", past: "found", pp: "found"},
@@ -221,7 +196,7 @@
         {ja: "する", present: "do", past: "did", pp: "done"},
         {ja: "食べる", present: "eat", past: "ate", pp: "eaten"},
         {ja: "見える", present: "see", past: "saw", pp: "seen"},
-        {ja: "得る", present: "get", past: "got", pp: "got"},
+        {ja: "得る", present: "get", past: "got", pp: "got/gotten"},
         {ja: "絵を描く", present: "draw", past: "drew", pp: "drawn"},
         {ja: "行く", present: "go", past: "went", pp: "gone"},
         {ja: "失う", present: "lose", past: "lost", pp: "lost"},
@@ -230,7 +205,7 @@
         {ja: "選ぶ", present: "choose", past: "chose", pp: "chosen"},
         {ja: "聞く", present: "hear", past: "heard", pp: "heard"},
         {ja: "理解する", present: "understand", past: "understood", pp: "understood"},
-        {ja: "読む", present: "read", past: "read", pp: "read"},
+        {ja: "読む", present: "read", present_audio: "read", past: "read", past_audio: "red", pp: "read", pp_audio: "red"},
         {ja: "意味する", present: "mean", past: "meant", pp: "meant"},
         {ja: "作る", present: "make", past: "made", pp: "made"},
         {ja: "会う", present: "meet", past: "met", pp: "met"},
@@ -247,7 +222,7 @@
         {ja: "座る", present: "sit", past: "sat", pp: "sat"},
         {ja: "壊す", present: "break", past: "broke", pp: "broken"},
         {ja: "泳ぐ", present: "swim", past: "swam", pp: "swum"},
-        {ja: "忘れる", present: "forget", past: "forgot", pp: "forgotten"},
+        {ja: "忘れる", present: "forget", past: "forgot", pp: "forgot/forgotten"},
         {ja: "飛ぶ", present: "fly", past: "flew", pp: "flown"}
     ];
 
@@ -263,16 +238,19 @@
 
     class QuizApp {
         constructor() {
-            this.history = JSON.parse(localStorage.getItem('verb_history_v2') || '[]');
-            this.ranking = JSON.parse(localStorage.getItem('verb_ranking_v2') || '[]');
+            this.migrateData();
+            this.history = this.loadData(STORAGE_KEYS.HISTORY);
+            this.ranking = this.loadData(STORAGE_KEYS.RANKING);
+            
             this.currentQuiz = [];
             this.currentIndex = 0;
             this.score = 0;
-            this.isFullMode = false;
-            this.mode = 'normal'; // 'normal' or 'junior'
+            this.mode = 'normal';
             
             this.ui = {
-                menu: document.getElementById('menu'),
+                subMenu: document.getElementById('sub-menu'),
+                menuTitle: document.getElementById('menu-title'),
+                modeBtn: document.getElementById('mode-switch-btn'),
                 quiz: document.getElementById('quiz-area'),
                 result: document.getElementById('result-area'),
                 modal: document.getElementById('modal-overlay'),
@@ -301,7 +279,81 @@
             };
         }
 
-        createInputRow(containerId, word) {
+        // --- 読み上げ機能 (TTS) ---
+        speak(text) {
+            if (!window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const uttr = new SpeechSynthesisUtterance(text);
+            uttr.lang = 'en-US';
+            uttr.rate = 0.9;
+            window.speechSynthesis.speak(uttr);
+        }
+
+        // read対策：特定の活用形に応じた発音用テキストを返す
+        getAudioText(verbObj, tense) {
+            const audioKey = `${tense}_audio`;
+            return verbObj[audioKey] || verbObj[tense];
+        }
+
+        getSpeakerHtml(verbObj, tense) {
+            const text = this.getAudioText(verbObj, tense);
+            return `<div class="speaker-btn" onclick="quizApp.speak('${text.replace(/'/g, "\\'")}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+            </div>`;
+        }
+
+        // --- データ管理ロジック ---
+        migrateData() {
+            const oldKeys = ['verb_history_v3.1', 'verb_ranking_v3.1'];
+            oldKeys.forEach(oldKey => {
+                const oldData = localStorage.getItem(oldKey);
+                if (oldData) {
+                    const targetKey = oldKey.includes('history') ? STORAGE_KEYS.HISTORY : STORAGE_KEYS.RANKING;
+                    const currentData = this.loadData(targetKey);
+                    try {
+                        const parsedOld = JSON.parse(oldData);
+                        const newData = Array.isArray(parsedOld) ? [...currentData, ...parsedOld] : currentData;
+                        this.saveData(targetKey, newData);
+                        localStorage.removeItem(oldKey);
+                    } catch (e) { console.error("Migration failed", e); }
+                }
+            });
+        }
+
+        loadData(key) {
+            const data = localStorage.getItem(key);
+            if (!data) return [];
+            try {
+                const parsed = JSON.parse(data);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) { return []; }
+        }
+
+        saveData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        // --- アプリのロジック ---
+        toggleMode() {
+            this.mode = (this.mode === 'normal') ? 'junior' : 'normal';
+            this.updateUIForMode();
+        }
+
+        updateUIForMode() {
+            if (this.mode === 'junior') {
+                this.ui.menuTitle.innerText = "１・２年生モード";
+                this.ui.menuTitle.className = "text-xl font-bold text-green-700";
+                this.ui.modeBtn.innerHTML = `<div><div class="font-bold text-xl text-indigo-700">通常モードに戻る</div><div class="text-sm text-slate-500">過去分詞形を含む学習に復帰します</div></div><span class="text-indigo-500 text-2xl">↺</span>`;
+                this.ui.modeBtn.className = "w-full mt-6 p-6 glass-card hover:bg-indigo-50 border-2 border-dashed border-indigo-200 transition-all text-left flex justify-between items-center group";
+            } else {
+                this.ui.menuTitle.innerText = "通常モード";
+                this.ui.menuTitle.className = "text-xl font-bold text-indigo-700";
+                this.ui.modeBtn.innerHTML = `<div><div class="font-bold text-xl text-green-700">１・２年生はこちら</div><div class="text-sm text-slate-500">原形と過去形のみを出題するモードへ</div></div><span class="text-green-500 text-2xl group-hover:translate-x-1 transition-transform">→</span>`;
+                this.ui.modeBtn.className = "w-full mt-6 p-6 glass-card hover:bg-green-50 border-2 border-dashed border-green-200 transition-all text-left flex justify-between items-center group";
+            }
+        }
+
+        createInputRow(containerId) {
             const container = this.ui.containers[containerId];
             container.innerHTML = '';
             const maxLen = 15;
@@ -310,12 +362,6 @@
                 input.type = "text";
                 input.className = "char-input w-8 md:w-10";
                 input.maxLength = 1;
-                input.setAttribute('autocomplete', 'off');
-                input.setAttribute('autocorrect', 'off');
-                input.setAttribute('autocapitalize', 'none');
-                input.setAttribute('spellcheck', 'false');
-                input.setAttribute('inputmode', 'email');
-
                 input.oninput = (e) => {
                     const val = e.target.value.toLowerCase();
                     if (!/^[a-z/]$/.test(val)) { e.target.value = ''; return; }
@@ -330,25 +376,15 @@
         }
 
         handleEnter(containerId) {
-            if (containerId === 'present') {
-                this.ui.containers.past.children[0].focus();
-            } else if (containerId === 'past') {
-                if (!this.ui.past2Wrapper.classList.contains('hidden')) {
-                    this.ui.containers.past2.children[0].focus();
-                } else if (this.mode === 'junior') {
-                    this.checkAnswer();
-                } else {
-                    this.ui.containers.pp.children[0].focus();
-                }
+            if (containerId === 'present') this.ui.containers.past.children[0].focus();
+            else if (containerId === 'past') {
+                if (!this.ui.past2Wrapper.classList.contains('hidden')) this.ui.containers.past2.children[0].focus();
+                else if (this.mode === 'junior') this.checkAnswer();
+                else this.ui.containers.pp.children[0].focus();
             } else if (containerId === 'past2') {
-                if (this.mode === 'junior') {
-                    this.checkAnswer();
-                } else {
-                    this.ui.containers.pp.children[0].focus();
-                }
-            } else {
-                this.checkAnswer();
-            }
+                if (this.mode === 'junior') this.checkAnswer();
+                else this.ui.containers.pp.children[0].focus();
+            } else this.checkAnswer();
         }
 
         getWordFromInputs(containerId) {
@@ -356,34 +392,8 @@
         }
 
         startFullMode() {
-            this.isFullMode = true;
-            this.mode = 'normal';
             const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
             this.generateQuiz(pool, pool.length);
-        }
-
-        startJuniorMode() {
-            this.isFullMode = false;
-            this.mode = 'junior';
-            const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
-            this.generateQuiz(pool, pool.length);
-        }
-
-        showCountDialog() {
-            this.showModal(`
-                <h3 class="text-xl font-bold mb-4">問題数指定</h3>
-                <input type="number" id="quiz-count-input" value="10" min="1" max="59" class="w-full p-4 border-2 rounded-xl text-2xl font-bold text-center mb-4">
-                <button onclick="quizApp.startCustomCount()" class="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold text-lg">開始</button>
-            `);
-        }
-
-        startCustomCount() {
-            const count = parseInt(document.getElementById('quiz-count-input').value) || 10;
-            this.closeModal();
-            this.isFullMode = false;
-            this.mode = 'normal';
-            const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
-            this.generateQuiz(pool, count);
         }
 
         startMistakeMode() {
@@ -393,14 +403,27 @@
                 this.showModal('<p class="p-8 text-center font-bold">間違い履歴がありません。</p>');
                 return;
             }
-            this.isFullMode = false;
-            this.mode = 'normal';
             const pool = indices.sort((a, b) => stats[b] - stats[a]).map(idx => VERB_DATA[idx]);
             this.generateQuiz(pool, pool.length);
         }
 
+        showCountDialog() {
+            this.showModal(`
+                <h3 class="text-xl font-bold mb-4">問題数指定</h3>
+                <input type="number" id="quiz-count-input" value="10" min="1" max="${VERB_DATA.length}" class="w-full p-4 border-2 rounded-xl text-2xl font-bold text-center mb-4">
+                <button onclick="quizApp.startCustomCount()" class="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold text-lg">開始</button>
+            `);
+        }
+
+        startCustomCount() {
+            const count = parseInt(document.getElementById('quiz-count-input').value) || 10;
+            this.closeModal();
+            const pool = [...VERB_DATA].sort(() => Math.random() - 0.5);
+            this.generateQuiz(pool, count);
+        }
+
         getMistakeStats() {
-            return this.history.reduce((acc, curr) => {
+            return this.history.filter(h => h.mode === this.mode).reduce((acc, curr) => {
                 if (!curr.isCorrect) acc[curr.verbIndex] = (acc[curr.verbIndex] || 0) + 1;
                 return acc;
             }, {});
@@ -412,7 +435,7 @@
             }));
             this.currentIndex = 0;
             this.score = 0;
-            this.ui.menu.classList.add('hidden');
+            this.ui.subMenu.classList.add('hidden');
             this.ui.quiz.classList.remove('hidden');
             this.showQuestion();
         }
@@ -424,26 +447,22 @@
             this.ui.status.innerText = `Question ${this.currentIndex + 1} / ${this.currentQuiz.length}`;
             this.ui.progress.style.width = `${(this.currentIndex / this.currentQuiz.length) * 100}%`;
             
-            // 各正解表示をリセット
-            Object.values(this.ui.answers).forEach(el => el.innerText = "");
-
-            this.createInputRow('present', q.present);
+            Object.values(this.ui.answers).forEach(el => el.innerHTML = "");
+            this.createInputRow('present');
             
-            const isWasWere = q.past === 'was/were';
-            if (isWasWere) {
+            if (q.past === 'was/were') {
                 this.ui.past2Wrapper.classList.remove('hidden');
-                this.createInputRow('past', 'was');
-                this.createInputRow('past2', 'were');
+                this.createInputRow('past');
+                this.createInputRow('past2');
             } else {
                 this.ui.past2Wrapper.classList.add('hidden');
-                this.createInputRow('past', q.past);
+                this.createInputRow('past');
             }
 
-            if (this.mode === 'junior') {
-                this.ui.ppWrapper.classList.add('hidden');
-            } else {
+            if (this.mode === 'junior') this.ui.ppWrapper.classList.add('hidden');
+            else {
                 this.ui.ppWrapper.classList.remove('hidden');
-                this.createInputRow('pp', q.pp);
+                this.createInputRow('pp');
             }
 
             this.ui.containers.present.children[0].focus();
@@ -469,217 +488,131 @@
                 const uPast2 = this.getWordFromInputs('past2');
                 const answers = new Set([uPast.toLowerCase(), uPast2.toLowerCase()]);
                 paOk = answers.has('was') && answers.has('were');
-                
-                const cls = paOk ? 'correct-input' : 'wrong-input';
-                [this.ui.containers.past, this.ui.containers.past2].forEach(cont => {
-                    Array.from(cont.children).forEach((inp) => {
-                        if (inp.value) inp.classList.add(cls);
-                        else if (!paOk) inp.classList.add('wrong-input');
-                    });
-                });
-                if (!paOk) {
-                    this.ui.answers.past.innerText = "正解: was";
-                    this.ui.answers.past2.innerText = "正解: were";
-                }
+                this.colorDoubleInputs('past', 'past2', paOk, "was", "were");
             } else {
                 paOk = check(uPast, q.past);
-                this.colorInputsOnly('past', uPast, paOk);
-                if (!paOk) this.ui.answers.past.innerText = `正解: ${q.past}`;
+                this.colorInputs('past', paOk, q, 'past');
             }
 
             if (this.mode !== 'junior') {
                 ppOk = check(uPP, q.pp);
-                this.colorInputsOnly('pp', uPP, ppOk);
-                if (!ppOk) this.ui.answers.pp.innerText = `正解: ${q.pp}`;
+                this.colorInputs('pp', ppOk, q, 'pp');
             }
 
-            this.colorInputsOnly('present', uPresent, pOk);
-            if (!pOk) this.ui.answers.present.innerText = `正解: ${q.present}`;
-
+            this.colorInputs('present', pOk, q, 'present');
             const allOk = pOk && paOk && ppOk;
+
+            this.ui.feedback.innerHTML = allOk 
+                ? `<span class="feedback-correct inline-block text-green-500 font-black" style="font-size:3rem;">✓ 正解！</span>`
+                : `<span class="feedback-wrong inline-block text-red-500 font-black" style="font-size:3rem;">✗ 不正解</span>`;
 
             if (allOk) {
                 this.score++;
-                this.ui.feedback.innerHTML = `<span class="feedback-correct inline-block text-green-500 font-black" style="font-size:3rem;">✓ 正解！</span>`;
-            } else {
-                this.ui.feedback.innerHTML = `<span class="feedback-wrong inline-block text-red-500 font-black" style="font-size:3rem;">✗ 不正解</span>`;
+                // 音声再生（修正後：個別の活用形に対応した発音用テキストを合成）
+                const v1 = this.getAudioText(q, 'present');
+                const v2 = this.getAudioText(q, 'past');
+                const audioText = this.mode === 'junior' ? `${v1}, ${v2}` : `${v1}, ${v2}, ${this.getAudioText(q, 'pp')}`;
+                this.speak(audioText);
             }
 
-            this.history.push({ verbIndex: q.verbIndex, isCorrect: allOk, ts: Date.now() });
-            localStorage.setItem('verb_history_v2', JSON.stringify(this.history));
+            this.history.push({ verbIndex: q.verbIndex, isCorrect: allOk, ts: Date.now(), mode: this.mode, v: APP_VERSION });
+            this.saveData(STORAGE_KEYS.HISTORY, this.history);
 
             this.ui.submitBtn.innerText = this.currentIndex < this.currentQuiz.length - 1 ? "次へ →" : "結果を見る";
             this.ui.submitBtn.onclick = () => this.nextQuestion();
         }
 
-        colorInputsOnly(containerId, userWord, isOk) {
-            const container = this.ui.containers[containerId];
-            Array.from(container.children).forEach((inp) => {
-                if (inp.value) {
-                    inp.classList.add(isOk ? 'correct-input' : 'wrong-input');
-                } else if (!isOk) {
-                    inp.classList.add('wrong-input');
-                }
+        colorInputs(id, isOk, verbObj, tense) {
+            const container = this.ui.containers[id];
+            const word = verbObj[tense];
+            Array.from(container.children).forEach(inp => {
+                if (inp.value) inp.classList.add(isOk ? 'correct-input' : 'wrong-input');
+                else if (!isOk) inp.classList.add('wrong-input');
             });
+            if (!isOk) {
+                this.ui.answers[id].innerHTML = `正解: ${word.replace(/\//g, ' / ')} ${this.getSpeakerHtml(verbObj, tense)}`;
+            } else {
+                this.ui.answers[id].innerHTML = this.getSpeakerHtml(verbObj, tense);
+            }
+        }
+
+        colorDoubleInputs(id1, id2, isOk, w1, w2) {
+            // was/were 専用 (現状は read 対策不要だが将来に備え構造維持)
+            [id1, id2].forEach(id => {
+                Array.from(this.ui.containers[id].children).forEach(inp => {
+                    if (inp.value) inp.classList.add(isOk ? 'correct-input' : 'wrong-input');
+                    else if (!isOk) inp.classList.add('wrong-input');
+                });
+            });
+            if (!isOk) {
+                // be動詞オブジェクトを模倣
+                const dummyBe = { past: 'was', past_audio: 'was', past2: 'were', past2_audio: 'were' };
+                this.ui.answers[id1].innerHTML = `正解: ${w1} ${this.getSpeakerHtml(dummyBe, 'past')}`;
+                this.ui.answers[id2].innerHTML = `正解: ${w2} ${this.getSpeakerHtml(dummyBe, 'past2')}`;
+            }
         }
 
         nextQuestion() {
             this.currentIndex++;
-            if (this.currentIndex >= this.currentQuiz.length) {
-                this.showResult();
-            } else {
-                this.showQuestion();
-            }
+            if (this.currentIndex >= this.currentQuiz.length) this.showResult();
+            else this.showQuestion();
         }
 
         showResult() {
             this.ui.quiz.classList.add('hidden');
             this.ui.result.classList.remove('hidden');
             const total = this.currentQuiz.length;
-
-            let message;
-            if (this.isFullMode) {
-                message = getFullModeMessage(this.score);
-            } else {
-                const pct = total > 0 ? this.score / total : 0;
-                if (pct === 1)        message = "満点！完璧です！🎉";
-                else if (pct >= 0.8)  message = "素晴らしい！あと少し！";
-                else if (pct >= 0.6)  message = "まずまず。復習しよう！";
-                else                  message = "もっと練習が必要です。";
-            }
-
-            const resultCard = this.ui.result;
-            resultCard.classList.add('result-animate');
-            setTimeout(() => resultCard.classList.remove('result-animate'), 600);
-
-            this.ui.score.classList.remove('score-animate');
-            void this.ui.score.offsetWidth;
-            this.ui.score.classList.add('score-animate');
             this.ui.score.innerText = `${this.score} / ${total}`;
-
-            this.ui.message.classList.remove('message-animate');
-            void this.ui.message.offsetWidth;
-            this.ui.message.classList.add('message-animate');
-            this.ui.message.innerText = message;
-
-            if (this.isFullMode && this.score === total) {
-                this.launchConfetti();
-            }
-
-            this.ranking.push({ score: this.score, total, ts: Date.now(), mode: this.mode });
+            this.ui.message.innerText = (this.mode === 'normal' && total === VERB_DATA.length) ? getFullModeMessage(this.score) : (this.score/total === 1 ? "満点！" : "お疲れ様でした！");
+            this.ranking.push({ score: this.score, total, ts: Date.now(), mode: this.mode, v: APP_VERSION });
             this.ranking.sort((a, b) => (b.score / b.total) - (a.score / a.total));
             this.ranking = this.ranking.slice(0, 10);
-            localStorage.setItem('verb_ranking_v2', JSON.stringify(this.ranking));
-        }
-
-        launchConfetti() {
-            const colors = ['#6366f1','#10b981','#f59e0b','#ef4444','#3b82f6','#ec4899'];
-            const container = this.ui.result;
-            for (let i = 0; i < 40; i++) {
-                const piece = document.createElement('div');
-                piece.className = 'confetti-piece';
-                piece.style.left = Math.random() * 100 + '%';
-                piece.style.top = '-10px';
-                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-                piece.style.animationDelay = (Math.random() * 0.8) + 's';
-                piece.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
-                container.appendChild(piece);
-                setTimeout(() => piece.remove(), 2000);
-            }
+            this.saveData(STORAGE_KEYS.RANKING, this.ranking);
         }
 
         exitToMenu() {
             this.ui.quiz.classList.add('hidden');
             this.ui.result.classList.add('hidden');
-            this.ui.menu.classList.remove('hidden');
+            this.ui.subMenu.classList.remove('hidden');
         }
 
         showAnalysis() {
             const stats = this.getMistakeStats();
             const entries = Object.entries(stats).sort((a, b) => b[1] - a[1]);
-            if (entries.length === 0) {
-                this.showModal('<p class="p-8 text-center font-bold">間違い履歴がありません。</p>');
-                return;
-            }
+            if (entries.length === 0) { this.showModal('<p class="p-8 text-center font-bold">履歴なし</p>'); return; }
             const rows = entries.map(([idx, cnt]) => {
                 const v = VERB_DATA[idx];
-                return `<tr class="border-b">
-                    <td class="py-2 pr-4">${v.ja}</td>
-                    <td class="py-2 pr-4 text-slate-500">${v.present} - ${v.past} - ${v.pp}</td>
-                    <td class="py-2 text-red-500 font-bold">${cnt}回</td>
-                </tr>`;
+                return `<tr class="border-b"><td class="py-2 font-bold">${v.ja}</td><td class="py-2 text-red-500 font-bold">${cnt}回</td></tr>`;
             }).join('');
-            this.showModal(`
-                <h3 class="text-xl font-bold mb-4">誤答分析</h3>
-                <table class="w-full text-sm">${rows}</table>
-                <button onclick="quizApp.clearHistory()" class="mt-6 w-full p-3 bg-red-100 text-red-600 rounded-xl font-bold">履歴をリセット</button>
-            `);
-        }
-
-        clearHistory() {
-            this.history = [];
-            localStorage.removeItem('verb_history_v2');
-            this.closeModal();
+            this.showModal(`<h3 class="text-xl font-bold mb-4">誤答分析</h3><table class="w-full">${rows}</table>`);
         }
 
         showRanking() {
-            if (this.ranking.length === 0) {
-                this.showModal('<p class="p-8 text-center font-bold">記録がありません。</p>');
-                return;
-            }
-            const rows = this.ranking.map((r, i) => {
-                const pct = Math.round((r.score / r.total) * 100);
-                const date = new Date(r.ts).toLocaleDateString('ja-JP');
-                const mLabel = r.mode === 'junior' ? '<span class="text-[10px] bg-green-100 text-green-600 px-1 rounded">1-2年</span>' : '';
-                return `<tr class="border-b">
-                    <td class="py-2 pr-3 font-bold">${i + 1}</td>
-                    <td class="py-2 pr-3">${r.score} / ${r.total} ${mLabel}</td>
-                    <td class="py-2 pr-3">${pct}%</td>
-                    <td class="py-2 text-slate-400 text-xs">${date}</td>
-                </tr>`;
-            }).join('');
-            this.showModal(`
-                <h3 class="text-xl font-bold mb-4">ランキング TOP10</h3>
-                <table class="w-full text-sm">${rows}</table>
-            `);
+            const filtered = this.ranking.filter(r => r.mode === this.mode);
+            const rows = filtered.map((r, i) => `<tr class="border-b"><td class="py-2 font-bold text-indigo-500">${i+1}</td><td class="py-2 font-bold">${r.score}/${r.total}</td></tr>`).join('');
+            this.showModal(`<h3 class="text-xl font-bold mb-4">ランキング</h3><table class="w-full">${rows}</table>`);
         }
 
         showVerbList() {
             const rows = VERB_DATA.map(v => `
                 <tr class="border-b text-sm">
-                    <td class="py-2 pr-3 text-slate-500">${v.ja}</td>
-                    <td class="py-2 pr-3">${v.present}</td>
-                    <td class="py-2 pr-3">${v.past}</td>
-                    <td class="py-2">${v.pp}</td>
+                    <td class="py-2 text-slate-500">${v.ja}</td>
+                    <td class="py-2 font-medium">${v.present} ${this.getSpeakerHtml(v, 'present')}</td>
+                    <td class="py-2 font-medium">${v.past} ${this.getSpeakerHtml(v, 'past')}</td>
+                    ${this.mode === 'normal' ? `<td class="py-2 font-medium">${v.pp} ${this.getSpeakerHtml(v, 'pp')}</td>` : ''}
                 </tr>`).join('');
-            this.showModal(`
-                <h3 class="text-xl font-bold mb-4">不規則動詞一覧</h3>
-                <table class="w-full">
-                    <thead><tr class="text-xs text-slate-400 border-b">
-                        <th class="pb-2 text-left">意味</th>
-                        <th class="pb-2 text-left">原形</th>
-                        <th class="pb-2 text-left">過去形</th>
-                        <th class="pb-2 text-left">過去分詞</th>
-                    </tr></thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            `);
+            this.showModal(`<h3 class="text-xl font-bold mb-4">一覧</h3><table class="w-full text-left">${rows}</table>`);
         }
 
         showModal(html) {
-            this.ui.modalContent.innerHTML = html + `<button onclick="quizApp.closeModal()" class="mt-4 w-full p-3 bg-slate-100 rounded-xl text-slate-600">閉じる</button>`;
+            this.ui.modalContent.innerHTML = html + `<button onclick="quizApp.closeModal()" class="mt-4 w-full p-3 bg-slate-100 rounded-xl font-bold">閉じる</button>`;
             this.ui.modal.classList.remove('hidden');
         }
-
-        closeModal() {
-            this.ui.modal.classList.add('hidden');
-        }
+        closeModal() { this.ui.modal.classList.add('hidden'); }
     }
 
     const quizApp = new QuizApp();
-    document.getElementById('modal-overlay').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('modal-overlay')) quizApp.closeModal();
-    });
+    document.getElementById('modal-overlay').addEventListener('click', (e) => { if (e.target === document.getElementById('modal-overlay')) quizApp.closeModal(); });
 </script>
 </body>
 </html>
